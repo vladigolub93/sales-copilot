@@ -1,0 +1,15 @@
+{
+  "root": true,
+  "extends": ["next", "next/core-web-vitals"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "settings": {
+    "next": {
+      "rootDir": ["src"]
+    }
+  },
+  "rules": {
+    "@next/next/no-img-element": "off"
+  }
+}
