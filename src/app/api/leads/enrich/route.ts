@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getOpenAIClient } from '@lib/clients/openai';
+import { getOpenAIClient, extractOutputText } from '@lib/clients/openai';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
+import type { Database } from '@types';
 import { LEAD_ENRICHMENT_PROMPT } from '@lib/prompts';
 import { logIntegrationError } from '@lib/utils/logger';
 import type { LeadEnrichmentPayload } from '@types';
@@ -22,7 +23,8 @@ export async function POST(request: Request) {
       throw leadResponse.error;
     }
 
-    const lead = leadResponse.data;
+    type LeadRow = Database['public']['Tables']['leads']['Row'];
+    const lead = leadResponse.data as LeadRow | null;
 
     const systemPrompt = LEAD_ENRICHMENT_PROMPT;
     const userPrompt = JSON.stringify({ lead, notes: payload.notes, enrichmentFields: payload.enrichmentFields });
@@ -35,11 +37,15 @@ export async function POST(request: Request) {
       ]
     });
 
-    const aiInsights = completion.output_text ?? 'AI enrichment placeholder. Replace with OpenAI response.';
+    const aiInsights = extractOutputText(completion) ?? 'AI enrichment placeholder. Replace with OpenAI response.';
+
+    const updatePayload: Database['public']['Tables']['leads']['Update'] = {
+      ai_insights: aiInsights
+    };
 
     await supabase
       .from('leads')
-      .update({ ai_insights: aiInsights })
+      .update(updatePayload as never)
       .eq('id', payload.leadId);
 
     return NextResponse.json({ lead: { id: payload.leadId, aiInsights } });

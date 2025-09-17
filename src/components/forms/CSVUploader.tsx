@@ -1,10 +1,11 @@
 'use client';
 
 import { ChangeEvent, useMemo, useState } from 'react';
-import Papa from 'papaparse';
+import Papa, { type ParseResult } from 'papaparse';
 import { z } from 'zod';
 import { Button } from '@components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/Card';
+import type { Database, LeadCreateInput, CompanyCreateInput, LeadCSVRow } from '@types';
 import { LeadCreateSchema, LeadCSVRowSchema } from '@types';
 import { CompanyCreateSchema } from '@types';
 import { supabase } from '@lib/supabase';
@@ -93,7 +94,7 @@ export function CSVUploader({ entity = 'lead', allowEntitySwitch = true, onCompl
       });
     });
 
-    const payload = validated.map((lead) => ({
+    const payload: Database['public']['Tables']['leads']['Insert'][] = validated.map((lead) => ({
       full_name: lead.fullName,
       title: lead.title ?? null,
       email: lead.email ?? null,
@@ -104,7 +105,7 @@ export function CSVUploader({ entity = 'lead', allowEntitySwitch = true, onCompl
       personal_notes: lead.personalNotes ?? null
     }));
 
-    const { error } = await supabase.from('leads').insert(payload);
+    const { error } = await supabase.from('leads').insert(payload as never);
     if (error) {
       throw error;
     }
@@ -140,7 +141,7 @@ export function CSVUploader({ entity = 'lead', allowEntitySwitch = true, onCompl
       });
     });
 
-    const payload = validated.map((company) => ({
+    const payload: Database['public']['Tables']['companies']['Insert'][] = validated.map((company) => ({
       name: company.name,
       website: company.website ?? null,
       linkedin: company.linkedIn ?? null,
@@ -152,7 +153,7 @@ export function CSVUploader({ entity = 'lead', allowEntitySwitch = true, onCompl
       investment_info: company.investmentInfo ?? null
     }));
 
-    const { error } = await supabase.from('companies').insert(payload);
+    const { error } = await supabase.from('companies').insert(payload as never);
     if (error) {
       throw error;
     }
@@ -222,13 +223,13 @@ export function CSVUploader({ entity = 'lead', allowEntitySwitch = true, onCompl
 
 async function parseCompanyCsv(file: File) {
   return new Promise<Array<Record<string, unknown>>>((resolve, reject) => {
-    Papa.parse<Record<string, string>>(file, {
+    Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       transformHeader(header: string) {
         return header.trim();
       },
-      complete(result) {
+      complete(result: ParseResult<Record<string, string>>) {
         if (result.errors.length > 0) {
           reject(result.errors[0]);
           return;

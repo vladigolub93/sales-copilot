@@ -48,6 +48,7 @@
   "include": [
     "next-env.d.ts",
     "src/**/*",
+    "types/**/*.d.ts",
     "supabase/**/*.ts",
     "supabase/**/*.tsx",
     ".next/types/**/*.ts",

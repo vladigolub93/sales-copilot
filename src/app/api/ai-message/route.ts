@@ -51,7 +51,20 @@ export async function POST(request: Request) {
       throw leadResponse.error;
     }
 
-    const lead = leadResponse.data;
+    type LeadRow = {
+      id: string;
+      full_name?: string | null;
+      title?: string | null;
+      email?: string | null;
+      phone?: string | null;
+      company_name?: string | null;
+      associated_company_id?: string | null;
+      linkedIn?: string | null;
+      personal_notes?: string | null;
+      ai_insights?: string | null;
+    };
+
+    const lead = leadResponse.data as LeadRow | null;
 
     if (!lead) {
       return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
@@ -75,7 +88,7 @@ export async function POST(request: Request) {
       company = companyResponse.data ?? null;
     }
 
-    const completion = await openai.responses.create({
+    const responseParams = {
       model: 'gpt-4.1-mini',
       input: [
         {
@@ -113,9 +126,24 @@ export async function POST(request: Request) {
           schema: jsonSchema
         }
       }
-    });
+    } as Parameters<typeof openai.responses.create>[0];
 
-    const output = completion.output_text;
+    const completion = await openai.responses.create(responseParams);
+    let output: string | undefined;
+
+    if ("output_text" in completion) {
+      output = (completion as { output_text?: string | undefined }).output_text;
+    } else if ("stream" in completion) {
+      const chunks: string[] = [];
+      for await (const event of (completion as AsyncIterable<{ type: string; content?: Array<{ text: string }>; }>) as AsyncIterable<any>) {
+        if (event.type === "response.output_text.delta" && event.delta) {
+          chunks.push(String(event.delta));
+        } else if (event.type === "response.output_text.done" && event.output_text) {
+          chunks.push(String(event.output_text));
+        }
+      }
+      output = chunks.join("");
+    }
 
     if (!output) {
       throw new Error('OpenAI did not return any text output.');

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
-import type { LeadCSVRow } from '@types';
+import type { Database, LeadCSVRow } from '@types';
 
 export async function POST(request: Request) {
   const { rows } = (await request.json()) as { rows: LeadCSVRow[] };
   const supabase = getSupabaseServiceClient();
 
-  const payload = rows.map((row) => ({
+  const payload: Database['public']['Tables']['leads']['Insert'][] = rows.map((row) => ({
     full_name: row.fullName,
     title: row.title,
     email: row.email,
@@ -17,7 +17,12 @@ export async function POST(request: Request) {
     personal_notes: row.personalNotes
   }));
 
-  const { data, error } = await supabase.from('leads').insert(payload).select('id');
+  const typedPayload = payload as Database['public']['Tables']['leads']['Insert'][];
+
+  const { data, error } = await supabase
+    .from('leads')
+    .insert(typedPayload as never)
+    .select('id');
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

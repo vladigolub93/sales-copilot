@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getOpenAIClient } from '@lib/clients/openai';
+import { getOpenAIClient, extractOutputText } from '@lib/clients/openai';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
 import { COMPANY_ENRICHMENT_PROMPT } from '@lib/prompts';
 import { logIntegrationError } from '@lib/utils/logger';
-import type { CompanyEnrichmentPayload } from '@types';
+import type { CompanyEnrichmentPayload, Database } from '@types';
 
 export async function POST(request: Request) {
   const payload = (await request.json()) as CompanyEnrichmentPayload;
@@ -23,20 +23,34 @@ export async function POST(request: Request) {
     }
 
     const company = companyResponse.data;
-    const completion = await openai.responses.create({
+
+    const responseParams = {
       model: 'gpt-4.1-mini',
       input: [
         { role: 'system', content: COMPANY_ENRICHMENT_PROMPT },
-        { role: 'user', content: JSON.stringify({ company, notes: payload.notes, enrichmentFields: payload.enrichmentFields }) }
+        {
+          role: 'user',
+          content: JSON.stringify({ company, notes: payload.notes, enrichmentFields: payload.enrichmentFields })
+        }
       ]
-    });
+    } as Parameters<typeof openai.responses.create>[0];
 
-    const aiInsights = completion.output_text ?? 'AI enrichment placeholder. Replace with OpenAI response.';
+    const completion = await openai.responses.create(responseParams);
 
-    await supabase
+    const aiInsights = extractOutputText(completion) ?? 'AI enrichment placeholder. Replace with OpenAI response.';
+
+    const updatePayload: Database['public']['Tables']['companies']['Update'] = {
+      ai_insights: aiInsights
+    };
+
+    const { error: updateError } = await supabase
       .from('companies')
-      .update({ ai_insights: aiInsights })
+      .update(updatePayload as never)
       .eq('id', payload.companyId);
+
+    if (updateError) {
+      throw updateError;
+    }
 
     return NextResponse.json({ company: { id: payload.companyId, aiInsights } });
   } catch (error) {

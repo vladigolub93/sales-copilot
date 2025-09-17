@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
-import { getOpenAIClient } from '@lib/clients/openai';
+import { getOpenAIClient, extractOutputText } from '@lib/clients/openai';
 import { logIntegrationError } from '@lib/utils/logger';
 
 const requestSchema = z.object({
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
-    const completion = await openai.responses.create({
+    const responseParams = {
       model: 'gpt-4.1-mini',
       input: [
         {
@@ -80,9 +80,11 @@ export async function POST(request: Request) {
           schema: jsonSchema
         }
       }
-    });
+    } as unknown as Parameters<typeof openai.responses.create>[0];
 
-    const output = completion.output_text ?? '{}';
+    const completion = await openai.responses.create(responseParams);
+
+    const output = extractOutputText(completion) ?? '{}';
     const parsedOutput = JSON.parse(output) as unknown;
     const validation = messageSchema.safeParse(parsedOutput);
 

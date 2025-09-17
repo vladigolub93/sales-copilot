@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
+import type { Database } from '@types';
 import { logIntegrationError } from '@lib/utils/logger';
 
 const requestSchema = z.object({
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
       .from('leads')
       .select('personal_notes')
       .eq('id', leadId)
-      .maybeSingle();
+      .maybeSingle<{ personal_notes?: string | null }>();
 
     if (existing.error) {
       throw existing.error;
@@ -36,7 +37,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Lead not found.' }, { status: 404 });
     }
 
-    let personal_notes: string | null = existing.data.personal_notes ?? null;
+    type LeadRow = Database['public']['Tables']['leads']['Row'];
+    const existingRow = existing.data as LeadRow;
+
+    let personal_notes: string | null = existingRow.personal_notes ?? null;
 
     if (notes && notes.trim().length > 0) {
       const trimmed = notes.trim();
@@ -45,15 +49,17 @@ export async function POST(request: Request) {
         : `Linked company note: ${trimmed}`;
     }
 
+    const updatePayload: Database['public']['Tables']['leads']['Update'] = {
+      associated_company_id: companyId ?? undefined,
+      personal_notes
+    };
+
     const { error, data } = await supabase
       .from('leads')
-      .update({
-        associated_company_id: companyId,
-        personal_notes
-      })
+      .update(updatePayload as never)
       .eq('id', leadId)
       .select('id, associated_company_id, personal_notes')
-      .maybeSingle();
+      .maybeSingle<{ id: string; associated_company_id: string | null; personal_notes: string | null }>();
 
     if (error) {
       throw error;

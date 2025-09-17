@@ -1,4 +1,4 @@
-import type { Company, CompanyCreateInput } from '@types';
+import type { Company, CompanyCreateInput, Database } from '@types';
 import { getSupabaseServiceClient } from './supabase';
 
 export async function getCompanies(): Promise<Company[]> {
@@ -9,7 +9,8 @@ export async function getCompanies(): Promise<Company[]> {
       .select(
         'id, name, website, linkedin, description, sector, sub_sector, employees, funding_stage, investment_info, associated_leads, ai_insights, news_feed, created_at'
       )
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .returns<Database['public']['Tables']['companies']['Row'][]>();
 
     if (error) {
       throw error;

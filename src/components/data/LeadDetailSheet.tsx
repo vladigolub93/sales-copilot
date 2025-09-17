@@ -7,7 +7,7 @@ import { Card, CardContent } from '@components/ui/Card';
 import { Input } from '@components/ui/Input';
 import { Textarea } from '@components/ui/Textarea';
 import type { Lead } from '@types';
-import type { Company } from '@types';
+import type { Company, Database } from '@types';
 import { supabase } from '@lib/supabase';
 import { startRetellCall } from '@lib/retell';
 
@@ -83,6 +83,8 @@ export function LeadDetailSheet({ open, lead, onClose, onRefresh }: LeadDetailSh
       return;
     }
 
+    const associatedCompanyId = lead.associatedCompanyId;
+
     let cancelled = false;
     const loadCompany = async () => {
       setIsCompanyLoading(true);
@@ -93,7 +95,7 @@ export function LeadDetailSheet({ open, lead, onClose, onRefresh }: LeadDetailSh
           .select(
             'id, name, website, linkedin, description, sector, sub_sector, employees, funding_stage, investment_info, ai_insights, news_feed, created_at, associated_leads'
           )
-          .eq('id', lead.associatedCompanyId)
+          .eq('id', associatedCompanyId)
           .maybeSingle();
 
         if (error) {
@@ -101,23 +103,24 @@ export function LeadDetailSheet({ open, lead, onClose, onRefresh }: LeadDetailSh
         }
 
         if (!cancelled) {
+          const companyRow = data as Database['public']['Tables']['companies']['Row'] | null;
           setCompany(
-            data
+            companyRow
               ? {
-                  id: String(data.id),
-                  name: data.name ?? '',
-                  website: data.website ?? undefined,
-                  linkedIn: data.linkedin ?? undefined,
-                  description: data.description ?? undefined,
-                  sector: data.sector ?? undefined,
-                  subSector: data.sub_sector ?? undefined,
-                  employees: data.employees ?? undefined,
-                  fundingStage: data.funding_stage ?? undefined,
-                  investmentInfo: data.investment_info ?? undefined,
-                  associatedLeads: (data.associated_leads as string[] | null) ?? undefined,
-                  aiInsights: data.ai_insights ?? undefined,
-                  newsFeed: data.news_feed ?? undefined,
-                  createdAt: data.created_at ?? new Date().toISOString()
+                  id: String(companyRow.id),
+                  name: companyRow.name ?? '',
+                  website: companyRow.website ?? undefined,
+                  linkedIn: companyRow.linkedin ?? undefined,
+                  description: companyRow.description ?? undefined,
+                  sector: companyRow.sector ?? undefined,
+                  subSector: companyRow.sub_sector ?? undefined,
+                  employees: companyRow.employees ?? undefined,
+                  fundingStage: companyRow.funding_stage ?? undefined,
+                  investmentInfo: companyRow.investment_info ?? undefined,
+                  associatedLeads: (companyRow.associated_leads as string[] | null) ?? undefined,
+                  aiInsights: companyRow.ai_insights ?? undefined,
+                  newsFeed: companyRow.news_feed ?? undefined,
+                  createdAt: companyRow.created_at ?? new Date().toISOString()
                 }
               : null
           );

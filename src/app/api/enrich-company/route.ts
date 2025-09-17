@@ -1,7 +1,8 @@
+import type { Database } from '@types';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
-import { getOpenAIClient } from '@lib/clients/openai';
+import { getOpenAIClient, extractOutputText } from '@lib/clients/openai';
 import { COMPANY_ENRICHMENT_PROMPT } from '@lib/prompts';
 import { logIntegrationError } from '@lib/utils/logger';
 
@@ -60,9 +61,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
-    const baseCompany = companyResponse.data;
+    type CompanyRow = Database['public']['Tables']['companies']['Row'];
+    const baseCompany = companyResponse.data as CompanyRow;
 
-    const response = await openai.responses.create({
+    const responseParams = {
       model: 'gpt-4.1-mini',
       input: [
         { role: 'system', content: `${COMPANY_ENRICHMENT_PROMPT}\nRespond strictly with JSON matching the provided schema.` },
@@ -81,9 +83,11 @@ export async function POST(request: Request) {
           schema: jsonSchema
         }
       }
-    });
+    } as unknown as Parameters<typeof openai.responses.create>[0];
 
-    const outputText = response.output_text;
+    const response = await openai.responses.create(responseParams);
+
+    const outputText = extractOutputText(response);
 
     if (!outputText) {
       throw new Error('OpenAI response did not include JSON output');
@@ -112,7 +116,7 @@ export async function POST(request: Request) {
       employees = Number.isFinite(numeric) ? numeric : undefined;
     }
 
-    const updatePayload = {
+    const updatePayload: Database['public']['Tables']['companies']['Update'] = {
       linkedin: linkedIn ?? baseCompany.linkedin ?? null,
       description: description ?? baseCompany.description ?? null,
       sector: sector ?? baseCompany.sector ?? null,
@@ -124,7 +128,7 @@ export async function POST(request: Request) {
 
     const { data: updatedCompany, error: updateError } = await supabase
       .from('companies')
-      .update(updatePayload)
+      .update(updatePayload as never)
       .eq('id', companyId)
       .select(
         'id, name, website, linkedin, description, sector, sub_sector, employees, funding_stage, investment_info'

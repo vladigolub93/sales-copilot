@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
-import { getOpenAIClient } from '@lib/clients/openai';
+import { getOpenAIClient, extractOutputText } from '@lib/clients/openai';
 import { buildCompanyNewsPrompt } from '@lib/prompts';
 import { logIntegrationError } from '@lib/utils/logger';
 
@@ -66,7 +66,12 @@ export async function POST(request: Request) {
         .from('companies')
         .select('name, description, sector, funding_stage')
         .eq('id', companyId)
-        .maybeSingle();
+        .maybeSingle<{
+          name?: string | null;
+          description?: string | null;
+          sector?: string | null;
+          funding_stage?: string | null;
+        }>();
 
       if (companyResponse.error) {
         throw companyResponse.error;
@@ -91,7 +96,7 @@ export async function POST(request: Request) {
 
     const prompt = buildCompanyNewsPrompt(resolvedName, context);
 
-    const completion = await openai.responses.create({
+    const responseParams = {
       model: 'gpt-4.1-mini',
       input: [
         { role: 'system', content: 'You are Sales Copilot, summarizing external news for revenue teams. Respond as JSON.' },
@@ -104,9 +109,11 @@ export async function POST(request: Request) {
           schema: jsonSchema
         }
       }
-    });
+    } as unknown as Parameters<typeof openai.responses.create>[0];
 
-    const output = completion.output_text ?? '{}';
+    const completion = await openai.responses.create(responseParams);
+
+    const output = extractOutputText(completion) ?? '{}';
     const parsedOutput = JSON.parse(output) as unknown;
     const validation = newsSchema.safeParse(parsedOutput);
 
