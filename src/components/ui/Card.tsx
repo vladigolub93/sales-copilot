@@ -26,6 +26,6 @@ export function CardDescription({ children }: { children: ReactNode }) {
   return <p className="text-sm text-slate-400">{children}</p>;
 }
 
-export function CardContent({ children }: { children: ReactNode }) {
-  return <div className="space-y-4">{children}</div>;
+export function CardContent({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={cn('space-y-4', className)}>{children}</div>;
 }
