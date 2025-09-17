@@ -5,8 +5,8 @@ import Papa from 'papaparse';
 import { z } from 'zod';
 import { Button } from '@components/ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/Card';
-import { LeadCreateSchema, LeadCSVRowSchema } from '@types/lead';
-import { CompanyCreateSchema } from '@types/company';
+import { LeadCreateSchema, LeadCSVRowSchema } from '@types';
+import { CompanyCreateSchema } from '@types';
 import { supabase } from '@lib/supabase';
 import { parseLeadCsv } from '@lib/csv';
 

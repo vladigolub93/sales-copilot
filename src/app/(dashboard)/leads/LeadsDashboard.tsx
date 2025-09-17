@@ -7,7 +7,7 @@ import { Card, CardContent } from '@components/ui/Card';
 import { ResourceTable, type ColumnConfig } from '@components/data/ResourceTable';
 import { CSVUploader } from '@components/forms/CSVUploader';
 import { LeadDetailSheet } from '@components/data/LeadDetailSheet';
-import type { Lead } from '@types/lead';
+import type { Lead } from '@types';
 
 export function LeadsDashboard() {
   const [leads, setLeads] = useState<Lead[]>([]);

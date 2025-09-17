@@ -1,5 +1,5 @@
 import Papa from 'papaparse';
-import type { LeadCSVRow } from '@types/lead';
+import type { LeadCSVRow } from '@types';
 
 const headerMap: Record<string, keyof LeadCSVRow> = {
   fullname: 'fullName',

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createLead, getLeads } from '@lib/server/leads';
-import type { LeadCreateInput } from '@types/lead';
+import type { LeadCreateInput } from '@types';
 
 export async function GET() {
   const leads = await getLeads();

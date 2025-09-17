@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@components/ui/Button';
 import { Textarea } from '@components/ui/Textarea';
-import type { Lead, LeadEnrichmentPayload } from '@types/lead';
+import type { Lead, LeadEnrichmentPayload } from '@types';
 import { useLeadEnrichment } from '@hooks/useLeadEnrichment';
 
 interface LeadEnrichmentPanelProps {

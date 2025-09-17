@@ -6,8 +6,8 @@ import { Button } from '@components/ui/Button';
 import { Card, CardContent } from '@components/ui/Card';
 import { Input } from '@components/ui/Input';
 import { Textarea } from '@components/ui/Textarea';
-import type { Lead } from '@types/lead';
-import type { Company } from '@types/company';
+import type { Lead } from '@types';
+import type { Company } from '@types';
 import { supabase } from '@lib/supabase';
 import { startRetellCall } from '@lib/retell';
 

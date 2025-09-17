@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@components/ui/Button';
 import { Textarea } from '@components/ui/Textarea';
-import type { Company, CompanyEnrichmentPayload } from '@types/company';
+import type { Company, CompanyEnrichmentPayload } from '@types';
 import { useCompanyEnrichment } from '@hooks/useCompanyEnrichment';
 
 interface CompanyEnrichmentPanelProps {

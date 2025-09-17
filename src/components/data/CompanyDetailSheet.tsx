@@ -4,8 +4,8 @@ import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Button } from '@components/ui/Button';
 import { Card, CardContent } from '@components/ui/Card';
-import type { Company } from '@types/company';
-import type { Lead } from '@types/lead';
+import type { Company } from '@types';
+import type { Lead } from '@types';
 import { startRetellCall } from '@lib/retell';
 
 interface CompanyDetailSheetProps {

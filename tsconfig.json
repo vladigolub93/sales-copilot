@@ -32,19 +32,26 @@
       "@lib/*": [
         "lib/*"
       ],
-      "@types/*": [
-        "types/*"
-      ],
       "@styles/*": [
         "styles/*"
+      ],
+      "@types": [
+        "types/index.ts"
       ]
-    }
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
     "src/**/*",
     "supabase/**/*.ts",
-    "supabase/**/*.tsx"
+    "supabase/**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/types/**/*.tsx"
   ],
   "exclude": [
     "node_modules"

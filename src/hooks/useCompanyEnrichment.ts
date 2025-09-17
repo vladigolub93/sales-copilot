@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Company, CompanyEnrichmentPayload } from '@types/company';
+import type { Company, CompanyEnrichmentPayload } from '@types';
 
 interface UseCompanyEnrichmentOptions {
   onComplete?: (company: Partial<Company>) => void;

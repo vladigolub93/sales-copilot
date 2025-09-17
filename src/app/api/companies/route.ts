@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createCompany, getCompanies } from '@lib/server/companies';
-import type { CompanyCreateInput } from '@types/company';
+import type { CompanyCreateInput } from '@types';
 
 export async function GET() {
   const companies = await getCompanies();

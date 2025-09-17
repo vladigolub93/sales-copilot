@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { LeadCSVRow } from '@types/lead';
+import type { LeadCSVRow } from '@types';
 import { parseLeadCsv } from '@lib/csv';
 
 export function useCsvUpload() {

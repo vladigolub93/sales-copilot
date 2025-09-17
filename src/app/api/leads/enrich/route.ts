@@ -3,7 +3,7 @@ import { getOpenAIClient } from '@lib/clients/openai';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
 import { LEAD_ENRICHMENT_PROMPT } from '@lib/prompts';
 import { logIntegrationError } from '@lib/utils/logger';
-import type { LeadEnrichmentPayload } from '@types/lead';
+import type { LeadEnrichmentPayload } from '@types';
 
 export async function POST(request: Request) {
   const payload = (await request.json()) as LeadEnrichmentPayload;

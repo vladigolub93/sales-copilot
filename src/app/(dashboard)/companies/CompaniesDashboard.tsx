@@ -7,7 +7,7 @@ import { Card, CardContent } from '@components/ui/Card';
 import { ResourceTable, type ColumnConfig } from '@components/data/ResourceTable';
 import { CSVUploader } from '@components/forms/CSVUploader';
 import { CompanyDetailSheet } from '@components/data/CompanyDetailSheet';
-import type { Company } from '@types/company';
+import type { Company } from '@types';
 
 export function CompaniesDashboard() {
   const [companies, setCompanies] = useState<Company[]>([]);

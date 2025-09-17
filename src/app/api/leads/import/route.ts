@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSupabaseServiceClient } from '@lib/server/supabase';
-import type { LeadCSVRow } from '@types/lead';
+import type { LeadCSVRow } from '@types';
 
 export async function POST(request: Request) {
   const { rows } = (await request.json()) as { rows: LeadCSVRow[] };

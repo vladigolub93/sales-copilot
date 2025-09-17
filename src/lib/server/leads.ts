@@ -1,4 +1,4 @@
-import type { Lead, LeadCreateInput } from '@types/lead';
+import type { Lead, LeadCreateInput } from '@types';
 import { getSupabaseServiceClient } from './supabase';
 
 export async function getLeads(): Promise<Lead[]> {

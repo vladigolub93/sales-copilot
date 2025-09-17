@@ -1,4 +1,4 @@
-import type { Company, CompanyCreateInput } from '@types/company';
+import type { Company, CompanyCreateInput } from '@types';
 import { getSupabaseServiceClient } from './supabase';
 
 export async function getCompanies(): Promise<Company[]> {

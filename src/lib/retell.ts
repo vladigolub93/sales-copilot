@@ -1,5 +1,5 @@
-import type { Lead } from '@types/lead';
-import type { Company } from '@types/company';
+import type { Lead } from '@types';
+import type { Company } from '@types';
 
 interface StartRetellCallResult {
   callId: string;

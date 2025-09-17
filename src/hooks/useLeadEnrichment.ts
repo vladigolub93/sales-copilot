@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { Lead, LeadEnrichmentPayload } from '@types/lead';
+import type { Lead, LeadEnrichmentPayload } from '@types';
 
 interface UseLeadEnrichmentOptions {
   onComplete?: (enrichedLead: Partial<Lead>) => void;
