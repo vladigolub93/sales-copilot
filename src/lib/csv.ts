@@ -19,7 +19,7 @@ export function parseLeadCsv(file: File): Promise<LeadCSVRow[]> {
       skipEmptyLines: true,
       transformHeader(header: string) {
         const normalized = header.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-        return headerMap[normalized] ?? header;
+        return headerMap[normalized] ?? normalized;
       },
       complete(result) {
         if (result.errors.length > 0) {
